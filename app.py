@@ -59,6 +59,19 @@ if uploaded_file is not None:
     st.subheader("Extracted Resume Text (Preview)")
     st.write(text[:1000])
     
+   if uploaded_file is not None:
+
+    with pdfplumber.open(uploaded_file) as pdf:
+        text = ""
+        for page in pdf.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text
+
+    st.subheader("Extracted Resume Text (Preview)")
+    st.write(text[:1000])
+
+    # 👇 EVERYTHING BELOW MUST BE INSIDE BUTTON
     if st.button("Analyze Resume"):
 
         cleaned = clean_resume(text)
@@ -69,18 +82,17 @@ if uploaded_file is not None:
 
         category = encoder.inverse_transform(prediction)
 
-        st.success(f"Predicted Category: {category[0]}")
+        st.success(f"ML Predicted Category: {category[0]}")
 
-    domain = detect_domain(text)
-    st.info(f"Detected Domain (Keyword Based): {domain}")
+        # ✅ Keyword detection
+        domain = detect_domain(text)
+        st.info(f"Detected Domain: {domain}")
 
-        # Show confidence chart
-proba_df = pd.DataFrame({
+        # ✅ Confidence chart (NOW SAFE)
+        proba_df = pd.DataFrame({
             "Category": encoder.classes_,
             "Confidence": probabilities
         }).sort_values(by="Confidence", ascending=False)
 
-st.subheader("Prediction Confidence")
-st.bar_chart(proba_df.set_index("Category").head(5))
-
-st.write("Top Probabilities:", sorted(probabilities, reverse=True)[:5])
+        st.subheader("Prediction Confidence")
+        st.bar_chart(proba_df.set_index("Category").head(5))

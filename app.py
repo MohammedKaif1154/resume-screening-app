@@ -47,8 +47,6 @@ st.write("Upload your resume (PDF) and get instant job category prediction.")
 # 🔹 Drag & Drop PDF
 uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
 
-uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
-
 if uploaded_file is not None:
 
     with pdfplumber.open(uploaded_file) as pdf:

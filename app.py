@@ -63,15 +63,6 @@ def calculate_ats_score(text):
     total_score = skill_score + section_score + density_score + length_score
     return round(total_score, 2)
 
-def missing_skills(text):
-    text = text.lower()
-
-    skills = [
-        "python", "sql", "excel", "machine learning",
-        "pandas", "numpy", "power bi", "tableau"
-    ]
-
-    return [skill for skill in skills if skill not in text]
 
 
 st.set_page_config(page_title="Resume Screening System", layout="wide")

@@ -80,7 +80,7 @@ proba_df = pd.DataFrame({
             "Confidence": probabilities
         }).sort_values(by="Confidence", ascending=False)
 
-        st.subheader("Prediction Confidence")
-        st.bar_chart(proba_df.set_index("Category").head(5))
+st.subheader("Prediction Confidence")
+st.bar_chart(proba_df.set_index("Category").head(5))
 
-        st.write("Top Probabilities:", sorted(probabilities, reverse=True)[:5])
+st.write("Top Probabilities:", sorted(probabilities, reverse=True)[:5])

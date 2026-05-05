@@ -4,6 +4,7 @@ import re
 import pandas as pd
 import pdfplumber
 
+
 tfidf = pickle.load(open("tfidf.pkl", "rb"))
 model = pickle.load(open("clf.pkl", "rb"))
 encoder = pickle.load(open("encoder.pkl", "rb"))
@@ -14,7 +15,6 @@ def clean_resume(text):
     text = re.sub(r'[^A-Za-z0-9 ]+', ' ', text)
     text = re.sub(r'\s+', ' ', text)
     return text.lower()
-
 
 def detect_domain(text):
     text = text.lower()
@@ -36,32 +36,10 @@ def detect_domain(text):
     return max(scores, key=scores.get)
 
 
-def calculate_ats_score(text):
-    text = text.lower()
-
-    sections = ["education", "experience", "projects", "skills"]
-
-    # Section Score (40)
-    section_matches = sum(1 for sec in sections if sec in text)
-    section_score = (section_matches / len(sections)) * 40
-
-    # Keyword richness (30)
-    words = text.split()
-    unique_words = set(words)
-    richness = len(unique_words) / len(words) if len(words) > 0 else 0
-    richness_score = richness * 30
-
-    # Length Score (30)
-    length_score = 30 if 300 <= len(words) <= 1200 else 10
-
-    total_score = section_score + richness_score + length_score
-    return round(total_score, 2)
-
-
 st.set_page_config(page_title="Resume Screening System", layout="wide")
 
 st.title("📄 Resume Screening System")
-st.write("Upload your resume and analyze it step-by-step.")
+st.write("Upload your resume (PDF) and analyze it step-by-step.")
 
 
 if "step" not in st.session_state:
@@ -74,9 +52,9 @@ if "text" not in st.session_state:
 uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
 
 if uploaded_file is not None and st.session_state.step == 1:
-
     st.success("Resume uploaded successfully ✅")
 
+    # Extract text once and store
     with pdfplumber.open(uploaded_file) as pdf:
         text = ""
         for page in pdf.pages:
@@ -110,7 +88,6 @@ if st.session_state.step == 3:
 
     text = st.session_state.text
 
-    # ML Prediction
     cleaned = clean_resume(text)
     vectorized = tfidf.transform([cleaned])
 
@@ -121,23 +98,9 @@ if st.session_state.step == 3:
 
     st.success(f"🎯 ML Predicted Category: {category[0]}")
 
-    # Domain Detection
+    # Keyword-based domain
     domain = detect_domain(text)
-    st.info(f"🧠 Detected Domain: {domain}")
-
-    # ATS Score
-    ats_score = calculate_ats_score(text)
-
-    st.subheader("📊 ATS Resume Score")
-    st.metric("ATS Score", f"{ats_score}/100")
-
-    # General Feedback (domain independent)
-    if ats_score >= 80:
-        st.success("Excellent resume structure and content ✅")
-    elif ats_score >= 60:
-        st.warning("Good resume, but can be improved (add more details/clarity) ⚠️")
-    else:
-        st.error("Resume needs improvement (add sections, improve structure) ❌")
+    st.info(f"🧠 Detected Domain (Keyword-Based): {domain}")
 
     # Confidence Chart
     proba_df = pd.DataFrame({
@@ -151,8 +114,8 @@ if st.session_state.step == 3:
     if st.button("✅ Done"):
         st.session_state.step = 4
 
-if st.session_state.step == 4:
 
+if st.session_state.step == 4:
     st.success("Analysis Completed 🎉")
 
     if st.button("🔄 Analyze Another Resume"):

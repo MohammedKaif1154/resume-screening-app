@@ -47,6 +47,8 @@ st.write("Upload your resume (PDF) and get instant job category prediction.")
 # 🔹 Drag & Drop PDF
 uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
 
+uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
+
 if uploaded_file is not None:
 
     with pdfplumber.open(uploaded_file) as pdf:
@@ -55,24 +57,12 @@ if uploaded_file is not None:
             page_text = page.extract_text()
             if page_text:
                 text += page_text
-                
-    st.subheader("Extracted Resume Text (Preview)")
-    st.write(text[:1000])
-    
-   if uploaded_file is not None:
-
-    with pdfplumber.open(uploaded_file) as pdf:
-        text = ""
-        for page in pdf.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text
 
     st.subheader("Extracted Resume Text (Preview)")
     st.write(text[:1000])
 
-    # 👇 EVERYTHING BELOW MUST BE INSIDE BUTTON
     if st.button("Analyze Resume"):
+
         cleaned = clean_resume(text)
         vectorized = tfidf.transform([cleaned])
 
@@ -83,11 +73,9 @@ if uploaded_file is not None:
 
         st.success(f"ML Predicted Category: {category[0]}")
 
-        # ✅ Keyword detection
         domain = detect_domain(text)
         st.info(f"Detected Domain: {domain}")
 
-        # ✅ Confidence chart (NOW SAFE)
         proba_df = pd.DataFrame({
             "Category": encoder.classes_,
             "Confidence": probabilities

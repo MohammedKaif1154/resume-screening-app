@@ -75,7 +75,7 @@ if uploaded_file is not None:
     st.info(f"Detected Domain (Keyword Based): {domain}")
 
         # Show confidence chart
-              proba_df = pd.DataFrame({
+proba_df = pd.DataFrame({
             "Category": encoder.classes_,
             "Confidence": probabilities
         }).sort_values(by="Confidence", ascending=False)

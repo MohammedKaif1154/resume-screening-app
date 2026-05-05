@@ -73,7 +73,6 @@ if uploaded_file is not None:
 
     # 👇 EVERYTHING BELOW MUST BE INSIDE BUTTON
     if st.button("Analyze Resume"):
-
         cleaned = clean_resume(text)
         vectorized = tfidf.transform([cleaned])
 

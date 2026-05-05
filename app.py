@@ -8,11 +8,13 @@ tfidf = pickle.load(open("tfidf.pkl", "rb"))
 model = pickle.load(open("clf.pkl", "rb"))
 encoder = pickle.load(open("encoder.pkl", "rb"))
 
+
 def clean_resume(text):
     text = re.sub(r'http\S+', '', text)
     text = re.sub(r'[^A-Za-z0-9 ]+', ' ', text)
     text = re.sub(r'\s+', ' ', text)
     return text.lower()
+
 
 def detect_domain(text):
     text = text.lower()
@@ -33,36 +35,27 @@ def detect_domain(text):
 
     return max(scores, key=scores.get)
 
+
 def calculate_ats_score(text):
     text = text.lower()
 
-    skills = [
-        "python", "sql", "excel", "machine learning", "data analysis",
-        "tensorflow", "pandas", "numpy", "power bi", "tableau"
-    ]
-
     sections = ["education", "experience", "projects", "skills"]
 
-    # Skill Score (50)
-    skill_matches = sum(1 for skill in skills if skill in text)
-    skill_score = (skill_matches / len(skills)) * 50
-
-    # Section Score (20)
+    # Section Score (40)
     section_matches = sum(1 for sec in sections if sec in text)
-    section_score = (section_matches / len(sections)) * 20
+    section_score = (section_matches / len(sections)) * 40
 
-    # Keyword Density (15)
+    # Keyword richness (30)
     words = text.split()
     unique_words = set(words)
-    density = len(unique_words) / len(words) if len(words) > 0 else 0
-    density_score = density * 15
+    richness = len(unique_words) / len(words) if len(words) > 0 else 0
+    richness_score = richness * 30
 
-    # Length Score (15)
-    length_score = 15 if 300 <= len(words) <= 1200 else 5
+    # Length Score (30)
+    length_score = 30 if 300 <= len(words) <= 1200 else 10
 
-    total_score = skill_score + section_score + density_score + length_score
+    total_score = section_score + richness_score + length_score
     return round(total_score, 2)
-
 
 
 st.set_page_config(page_title="Resume Screening System", layout="wide")
@@ -138,18 +131,13 @@ if st.session_state.step == 3:
     st.subheader("📊 ATS Resume Score")
     st.metric("ATS Score", f"{ats_score}/100")
 
+    # General Feedback (domain independent)
     if ats_score >= 80:
-        st.success("Excellent resume! ✅")
+        st.success("Excellent resume structure and content ✅")
     elif ats_score >= 60:
-        st.warning("Good resume, but can be improved ⚠️")
+        st.warning("Good resume, but can be improved (add more details/clarity) ⚠️")
     else:
-        st.error("Resume needs improvement ❌")
-
-    # Missing Skills
-    missing = missing_skills(text)
-
-    st.subheader("❗ Missing Skills Suggestions")
-    st.write(missing[:5])
+        st.error("Resume needs improvement (add sections, improve structure) ❌")
 
     # Confidence Chart
     proba_df = pd.DataFrame({
@@ -162,7 +150,6 @@ if st.session_state.step == 3:
 
     if st.button("✅ Done"):
         st.session_state.step = 4
-
 
 if st.session_state.step == 4:
 
